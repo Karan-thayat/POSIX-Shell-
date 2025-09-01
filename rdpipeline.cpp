@@ -1,0 +1,1 @@
+// combinations of redirection with pipeline
