@@ -75,3 +75,5 @@ string autocomplete_input();
 void add_to_history(const string &cmd);
 void load_history_file();
 void save_history_file();
+
+void lsCommand(const vector<string>& args);
