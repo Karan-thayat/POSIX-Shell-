@@ -52,12 +52,45 @@ void pwd() {
 }
 
 void echo(const string &line) {
-    if(line.size()<=5){
-        cout<<endl;
-        return;
+
+     string raw = line.substr(4);
+
+    string output;
+    for (size_t i = 0; i < raw.size(); ) {
+        if (raw.compare(i, 6, "&nbsp;") == 0) {
+            output.push_back(' ');
+            i += 6;
+        } else {
+            output.push_back(raw[i]);
+            i++;
+        }
     }
-    string output = line.substr(5);  
-    cout << output << endl;
-}  
+
+    string collapsed;
+    bool inQuotes = false;
+    bool inSpace = false;
+
+    for (size_t i = 0; i < output.size(); i++) {
+        char c = output[i];
+
+        if (c == '"' || c == '\'') {
+            inQuotes = !inQuotes;  
+            collapsed.push_back(c); 
+            continue;
+        }
+
+        if (!inQuotes && (c == ' ' || c == '\t')) {
+            if (!inSpace) {
+                collapsed.push_back(' ');
+                inSpace = true;
+            }
+        } else {
+            collapsed.push_back(c);
+            inSpace = false;
+        }
+    }
+
+    cout << collapsed << endl;
+} 
 
   
