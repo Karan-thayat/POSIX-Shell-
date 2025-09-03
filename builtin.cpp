@@ -31,7 +31,6 @@ void cd(const vector<string> &args) {
      else if (target == "-") {
     
         if(chdir(preDir.c_str())==0){
-        cout<<preDir<<endl;
         preDir = currDir;
         }
     } else {
