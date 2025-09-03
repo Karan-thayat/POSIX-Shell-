@@ -19,7 +19,7 @@ void cd(const vector<string> &args) {
     string target = args[1];
     static string preDir = SHELL_HOME;
     char cwd[N];
-    getcwd(cwd,N);
+    if(!getcwd(cwd,N))perror("getcwd");
     string currDir = cwd;
 
     if (target == "~") {

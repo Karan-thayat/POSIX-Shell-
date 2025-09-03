@@ -77,7 +77,7 @@ string get_input(const std::string &prompt);
 bool handle_redirection(vector<string> &args);
 
 // Pipeline
-void execute_pipeline(string line);
+void execute_pipeline(const string &line);
 
 //autocomplete
 string get_input(const string &prompt);

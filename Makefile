@@ -1,11 +1,11 @@
 CXX := g++
 CXXFLAGS := -std=gnu++17 -O2 -Wall -Wextra 
-TARGET := myshell
+TARGET := shell
 
 SRC := main.cpp display.cpp builtin.cpp  \
        ls.cpp syscmd.cpp pinfo.cpp search.cpp \
-       redirect.cpp pipeline.cpp rdpipeline.cpp \
-       signals.cpp autocomplete.cpp history.cpp parser.cpp
+       redirect.cpp pipeline.cpp  \
+       signals.cpp autocomplete.cpp history.cpp 
 
 OBJ := $(SRC:.cpp=.o)
 

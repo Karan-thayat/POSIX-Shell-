@@ -1,4 +1,9 @@
 #include "header.h"
+#include <iostream>
+#include <sys/wait.h>
+#include <signal.h>
+
+using namespace std;
 
 void executesyscmd(vector<string> args) {
     if (args.empty()) return;
@@ -17,14 +22,13 @@ void executesyscmd(vector<string> args) {
     argv.push_back(nullptr);
 
     pid_t pid = fork();
-
     if (pid < 0) {
         perror("fork failed");
         return;
     }
 
     if (pid == 0) {
-        // In child → execute system command
+        // ===== Child process =====
         signal(SIGINT, SIG_DFL);
         signal(SIGTSTP, SIG_DFL);
 
@@ -33,19 +37,25 @@ void executesyscmd(vector<string> args) {
             exit(1);
         }
     } else {
+        // ===== Parent process =====
         if (background) {
-            // Parent does NOT wait → background process
             cout << "Started background process PID: " << pid << endl;
-            jobs.push_back({pid,args[0],true});
+            jobs.push_back({pid, args[0], true});
         } else {
-            // Foreground → wait for child to finish
             fgProcess = pid;
             fgName = args[0];
 
             int status;
             waitpid(pid, &status, WUNTRACED);
+
+            if (WIFSTOPPED(status)) {
+                jobs.push_back({pid, args[0], false});
+                cout << "\nStopped foreground process: " << args[0] 
+                     << " (PID " << pid << ")" << endl;
+            }
+
             fgProcess = -1;
-            fgName ="";
+            fgName = "";
         }
     }
 }

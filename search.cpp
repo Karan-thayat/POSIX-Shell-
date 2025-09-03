@@ -40,7 +40,7 @@ void search(const vector<string> &args) {
     string target = args[1];
 
     char cwd[N];
-    getcwd(cwd, N);
+   if(!getcwd(cwd, N))perror("getcwd");
     string startDir = cwd;
 
     bool found = searchHelper(startDir, target);

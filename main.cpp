@@ -19,7 +19,7 @@ int main()
 
     // save starting directory into SHELL_HOME
     char cwd0[PATH_MAX];
-    getcwd(cwd0, sizeof(cwd0));
+    if(!getcwd(cwd0, sizeof(cwd0))) perror("getcwd");
     SHELL_HOME = string(cwd0);
 
     load_history();

@@ -3,7 +3,7 @@
 string prompt()
 {
     char curdir[N];
-    getcwd(curdir, N);
+    if(!getcwd(curdir, N))perror("getcwd");
     string cwd = curdir;
 
     char sysname[N];
@@ -15,7 +15,7 @@ string prompt()
 
     string res;
 
-    bool flag = 1;
+    
     if (cwd.compare(0, SHELL_HOME.size(), SHELL_HOME) == 0)
     {
         res = "~" + cwd.substr(SHELL_HOME.size());
