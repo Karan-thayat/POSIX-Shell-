@@ -12,14 +12,16 @@
 #include <time.h>
 #include <errno.h>
 #include <limits.h>
+#include <fstream>
+#include <iostream>
+#include <vector>
 
-#define  N 4096    // PATH_MAX
+#define N 4096    // PATH_MAX
 using namespace std;
 
 // ========= Shared Globals =========
 // Inline avoids "multiple definition" errors when included in many .cpp files
 inline string SHELL_HOME;           
-inline vector<string> historyVec;   
 inline pid_t foreground_pgid = -1;  
 inline vector<pid_t> bg_pids;       
 
@@ -30,50 +32,52 @@ struct Cmd {
     string outfile;
     bool append = false;
 };
-
+// helpers
+vector<string> tokenize(const string &line);
 // ========= Display =========
-void prompt();
+string prompt();
 
-// builtin commands
+// ========= Builtins =========
 void cd(const vector<string> &args);
 void pwd();
 void echo(const string &line);
-
-// Search
 void search(const vector<string> &args);
-
-// ========= Builtins =========
-int builtin_cd(vector<string> &args);
-int builtin_pwd(vector<string> &args);
-int builtin_echo(vector<string> &args);
-int builtin_ls(vector<string> &args);
-int builtin_pinfo(vector<string> &args);
-int builtin_history(vector<string> &args);
-int builtin_search(vector<string> &args);
-
-bool is_shell_builtin(const string &cmd);
-int run_builtin_in_parent(vector<string> &tokens);
+void pinfo(vector<string> args);
+void lsCommand(const vector<string> &args);
 
 // ========= System Commands =========
-int execute_syscmd(vector<Cmd> &pipeline, bool background);
-
-// ========= Parsing =========
-vector<Cmd> parse_pipeline(const string &cmdstr, bool &background);
-string trim(const string &s);
-
-// ========= Redirection & Pipelines =========
-int handle_redirection(Cmd &cmd);
-int execute_pipeline(vector<Cmd> &pipeline, bool background);
+void sigchld_handler(int sig);
+void executesyscmd(vector<string> args);
 
 // ========= Signals =========
+extern pid_t fgProcess;
+struct Job {
+    pid_t pid;
+    string command;
+    bool stopped;
+};
+extern vector<Job> jobs;
+extern string fgName;
+void sigintHandler(int sig);
+void sigtstpHandler(int sig);
 void setup_signals();
 
-// ========= Autocomplete =========
-string autocomplete_input();
+ // ========= History =========
+extern vector<string> history_list;   // shared history
+extern int history_index;             // current index for UP/DOWN
+void add_history(const string &cmd);
+void load_history();
+void save_history();
+void print_history(int n);
 
-// ========= History =========
-void add_to_history(const string &cmd);
-void load_history_file();
-void save_history_file();
+// ========= Input (with UP/DOWN arrows) =========
+string get_input(const std::string &prompt);
 
-void lsCommand(const vector<string>& args);
+//  I/O redirection
+bool handle_redirection(vector<string> &args);
+
+// Pipeline
+void execute_pipeline(string line);
+
+//autocomplete
+string get_input(const string &prompt);

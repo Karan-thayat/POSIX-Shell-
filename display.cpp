@@ -1,6 +1,6 @@
 #include "header.h"
 
-void prompt()
+string prompt()
 {
     char curdir[N];
     getcwd(curdir, N);
@@ -26,6 +26,6 @@ void prompt()
     {
         res = cwd;
     }
-    cout << "<" << username << "@" << host << ":" << res << "> ";
-    cout.flush();
+    return  "<" + username + "@" + host + ":" + res + "> ";
+    
 }

@@ -44,7 +44,7 @@ void cd(const vector<string> &args) {
 }
 void pwd() {
     char cwd[N];
-    if (getcwd(cwd, N) != NULL) {
+    if (getcwd(cwd, N)) {
         cout << cwd << endl;
     } else {
         perror("pwd");
@@ -58,4 +58,6 @@ void echo(const string &line) {
     }
     string output = line.substr(5);  
     cout << output << endl;
-}
+}  
+
+  
