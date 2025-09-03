@@ -1,5 +1,4 @@
 #include "header.h"
-
 // helper: split string by spaces (for cd, pwd etc.)
 vector<string> tokenize(const string &line)
 {
@@ -23,7 +22,7 @@ int main()
     SHELL_HOME = string(cwd0);
 
     load_history();
-
+    setup_autocomplete();
     while (true)
     {
        

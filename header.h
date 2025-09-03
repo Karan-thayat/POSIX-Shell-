@@ -1,5 +1,8 @@
 #pragma once
-#include <bits/stdc++.h>
+#include <string>
+#include <vector>
+#include <iostream>
+#include <fstream>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -9,12 +12,10 @@
 #include <pwd.h>
 #include <grp.h>
 #include <signal.h>
-#include <time.h>
-#include <errno.h>
 #include <limits.h>
-#include <fstream>
-#include <iostream>
-#include <vector>
+#include <sstream>
+#include <iomanip>
+#include <algorithm>
 
 #define N 4096    // PATH_MAX
 using namespace std;
@@ -63,15 +64,14 @@ void sigtstpHandler(int sig);
 void setup_signals();
 
  // ========= History =========
-extern vector<string> history_list;   // shared history
+extern vector<string> histlist;   // shared history
 extern int history_index;             // current index for UP/DOWN
 void add_history(const string &cmd);
 void load_history();
 void save_history();
+string get_input(const string &prompt);
 void print_history(int n);
 
-// ========= Input (with UP/DOWN arrows) =========
-string get_input(const std::string &prompt);
 
 //  I/O redirection
 bool handle_redirection(vector<string> &args);
@@ -80,4 +80,5 @@ bool handle_redirection(vector<string> &args);
 void execute_pipeline(const string &line);
 
 //autocomplete
-string get_input(const string &prompt);
+extern vector<string> builtin_cmds;
+void setup_autocomplete();

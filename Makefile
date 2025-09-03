@@ -12,7 +12,7 @@ OBJ := $(SRC:.cpp=.o)
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJ)
+	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJ) -lreadline
 
 %.o: %.cpp header.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
