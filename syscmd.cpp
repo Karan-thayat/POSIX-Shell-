@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sys/wait.h>
 #include <signal.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -9,10 +10,9 @@ void executesyscmd(vector<string> args) {
     if (args.empty()) return;
 
     bool background = false;
-
     if (args.back() == "&") {
         background = true;
-        args.pop_back(); 
+        args.pop_back();
     }
 
     vector<char*> argv;
@@ -27,6 +27,13 @@ void executesyscmd(vector<string> args) {
 
     if (pid == 0) {
        
+        setpgid(0, 0);  
+
+        if (!background) {
+            
+            tcsetpgrp(STDIN_FILENO, getpid());
+        }
+
         signal(SIGINT, SIG_DFL);
         signal(SIGTSTP, SIG_DFL);
 
@@ -34,21 +41,29 @@ void executesyscmd(vector<string> args) {
             perror("execvp failed");
             exit(1);
         }
-    } else {
-       
+    } 
+    else {
+        setpgid(pid, pid);  
+
         if (background) {
-            cout << "Started background process PID: " << pid << endl;
-            jobs.push_back({pid, args[0], true});
-        } else {
+            cout << "Started background process: " << args[0] 
+                 << " (PID " << pid << ")" << endl;
+            jobs.push_back({pid, args[0], false}); 
+        } 
+        else {
             fgProcess = pid;
             fgName = args[0];
+
+            tcsetpgrp(STDIN_FILENO, pid);
 
             int status;
             waitpid(pid, &status, WUNTRACED);
 
+            tcsetpgrp(STDIN_FILENO, getpgrp());
+
             if (WIFSTOPPED(status)) {
-                jobs.push_back({pid, args[0], false});
-                cout << endl<<"Stopped foreground process: " << args[0] 
+                jobs.push_back({pid, args[0], true}); 
+                cout << endl << "Stopped foreground process: " << args[0] 
                      << " (PID " << pid << ")" << endl;
             }
 

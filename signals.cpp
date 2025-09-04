@@ -35,9 +35,7 @@ void sigintHandler(int sig)
     if (fgProcess > 0)
     {
         kill(fgProcess, SIGINT);
-        cout << endl;
-        fgProcess = -1; 
-        fgName = "";
+        cerr<<endl<<fgName<<"(PID "<<fgProcess<<")"<<endl;
     }
 }
 
@@ -47,11 +45,11 @@ void sigtstpHandler(int sig)
     if (fgProcess > 0)
     {
         kill(fgProcess, SIGTSTP);
-        cout << endl
-             << "Stopped foreground process: " << fgName
+        cerr << "Stopped foreground process: " << fgName
              << " (PID " << fgProcess << ")" << endl;
 
         jobs.push_back({fgProcess, fgName, true});
+        tcsetpgrp(STDIN_FILENO, getpgrp());
         fgProcess = -1; 
         fgName = "";
     }
