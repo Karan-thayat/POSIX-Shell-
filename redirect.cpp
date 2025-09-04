@@ -1,54 +1,65 @@
 #include "header.h"
+#include <fcntl.h>
+#include <unistd.h>
+#include <iostream>
+#include <vector>
+using namespace std;
 
-bool handle_redirection(vector<string> &args) {
-    int in_fd = -1, out_fd = -1;
+RedirFDs handle_redirection(vector<string> &args) {
+    RedirFDs fds;
+    fds.in_fd = -1;
+    fds.out_fd = -1;
 
-    for (size_t i = 0; i < args.size();) {
+    for (size_t i = 0; i < args.size(); ) {
         if (args[i] == "<") {
             if (i + 1 >= args.size()) {
-                cerr << "Redirection error: no input file specified\n";
-                return true;
+                cerr << "Input redirection: No file specified\n";
+                fds.in_fd = -2; // signal error
+                return fds;
             }
-            in_fd = open(args[i + 1].c_str(), O_RDONLY);
-            if (in_fd < 0) {
+            int fd = open(args[i+1].c_str(), O_RDONLY);
+            if (fd < 0) {
                 perror("Input redirection");
-                return true;
+                fds.in_fd = -2; // signal error
+                return fds;
             }
-            dup2(in_fd, STDIN_FILENO);
-            close(in_fd);
+            fds.in_fd = fd;
             args.erase(args.begin() + i, args.begin() + i + 2);
         }
         else if (args[i] == ">") {
             if (i + 1 >= args.size()) {
-                cerr << "Redirection error: no output file specified\n";
-                return true;
+                cerr << "Output redirection: No file specified\n";
+                fds.out_fd = -2; // signal error
+                return fds;
             }
-            out_fd = open(args[i + 1].c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-            if (out_fd < 0) {
+            int fd = open(args[i+1].c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+            if (fd < 0) {
                 perror("Output redirection");
-                return true;
+                fds.out_fd = -2;
+                return fds;
             }
-            dup2(out_fd, STDOUT_FILENO);
-            close(out_fd);
+            fds.out_fd = fd;
             args.erase(args.begin() + i, args.begin() + i + 2);
         }
         else if (args[i] == ">>") {
             if (i + 1 >= args.size()) {
-                cerr << "Redirection error: no output file specified\n";
-                return true;
+                cerr << "Output redirection: No file specified\n";
+                fds.out_fd = -2;
+                return fds;
             }
-            out_fd = open(args[i + 1].c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644);
-            if (out_fd < 0) {
-                perror("Append redirection");
-                return true;
+            int fd = open(args[i+1].c_str(), O_WRONLY | O_CREAT | O_APPEND, 0644);
+            if (fd < 0) {
+                perror("Output redirection");
+                fds.out_fd = -2;
+                return fds;
             }
-            dup2(out_fd, STDOUT_FILENO);
-            close(out_fd);
+            fds.out_fd = fd;
             args.erase(args.begin() + i, args.begin() + i + 2);
         }
         else {
             i++;
         }
     }
-    return false; 
+
+    return fds;
 }

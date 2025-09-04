@@ -25,6 +25,6 @@ string prompt()
     {
         res = cwd;
     }
-    return  "<" + username + "@" + host + ":" + res + ">";
+    return  "<" + username + "@" + host + ":" + res + "> ";
     
 }

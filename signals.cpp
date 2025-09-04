@@ -31,26 +31,32 @@ void sigchld_handler(int sig)
 
 void sigintHandler(int sig)
 {
-    (void)sig; 
+    (void)sig;
     if (fgProcess > 0)
     {
         kill(fgProcess, SIGINT);
-        cerr<<endl<<fgName<<"(PID "<<fgProcess<<")"<<endl;
+        cerr << "\nInterrupted foreground process: " 
+             << fgName << " (PID " << fgProcess << ")" << endl;
+
+        fgProcess = -1;
+        fgName = "";
     }
 }
 
 void sigtstpHandler(int sig)
 {
-    (void)sig; 
+    (void)sig;
     if (fgProcess > 0)
     {
-        kill(fgProcess, SIGTSTP);
-        cerr << "Stopped foreground process: " << fgName
-             << " (PID " << fgProcess << ")" << endl;
+        if (kill(fgProcess, SIGTSTP) == 0) {
+            cerr << "\nStopped foreground process: " 
+                 << fgName << " (PID " << fgProcess << ")" << endl;
 
-        jobs.push_back({fgProcess, fgName, true});
-        tcsetpgrp(STDIN_FILENO, getpgrp());
-        fgProcess = -1; 
+            jobs.push_back({fgProcess, fgName, true});  
+            tcsetpgrp(STDIN_FILENO, getpgrp());
+        }
+
+        fgProcess = -1;
         fgName = "";
     }
 }

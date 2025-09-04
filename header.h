@@ -17,31 +17,41 @@
 #include <algorithm>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <dirent.h>
-#include <vector>
-#include <string>
 #include <cstring>
-#include <algorithm>
-#include <iostream>
 
 #define N 4096    // PATH_MAX
+
 using namespace std;
+
+//  Globals 
 inline string SHELL_HOME;           
 inline pid_t foreground_pgid = -1;  
 inline vector<pid_t> bg_pids;       
 
-// shared structure
+//  Job Control 
+struct Job {
+    pid_t pid;
+    string command;
+    bool stopped;
+};
+
+extern pid_t fgProcess;
+extern string fgName;
+extern vector<Job> jobs;
+
+//  Command structure 
 struct Cmd {
     vector<string> argv;
     string infile;
     string outfile;
     bool append = false;
 };
-// tokenize and display
+
+//  Tokenizer & Prompt 
 vector<string> tokenize(const string &line);
 string prompt();
 
-// Builtins 
+//  Builtins 
 void cd(const vector<string> &args);
 void pwd();
 void echo(const string &line);
@@ -49,19 +59,11 @@ void search(const vector<string> &args);
 void pinfo(vector<string> args);
 void lsCommand(const vector<string> &args);
 
-// System Commands 
-void sigchld_handler(int sig);
+//  System Commands 
 void executesyscmd(vector<string> args);
 
-// signals and job controls
-extern pid_t fgProcess;
-struct Job {
-    pid_t pid;
-    string command;
-    bool stopped;
-};
-extern vector<Job> jobs;
-extern string fgName;
+//  Signals 
+void sigchld_handler(int sig);
 void sigintHandler(int sig);
 void sigtstpHandler(int sig);
 void setup_signals();
@@ -75,12 +77,16 @@ void saveHistory();
 string get_input(const string &prompt);
 void printHistory(int n);
 
-//  I/O redirection
-bool handle_redirection(vector<string> &args);
+//  I/O Redirection 
+struct RedirFDs {
+    int in_fd;
+    int out_fd;
+};
+RedirFDs handle_redirection(vector<string> &args);
 
-// Pipeline
+//  Pipelines 
 void execute_pipeline(const string &line);
 
-//autocomplete
+//  Autocomplete 
 extern vector<string> builtin_cmds;
 void setup_autocomplete();
