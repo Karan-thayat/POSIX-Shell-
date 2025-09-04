@@ -15,6 +15,14 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
+#include <readline/readline.h>
+#include <readline/history.h>
+#include <dirent.h>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <iostream>
 
 #define N 4096    // PATH_MAX
 using namespace std;

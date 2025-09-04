@@ -1,12 +1,5 @@
 #include "header.h"
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <dirent.h>
-#include <vector>
-#include <string>
-#include <cstring>
-#include <algorithm>
-#include <iostream>
+
 using namespace std;
 
 vector<string> builtin_cmds = {"cd","pwd","echo","history","ls","pinfo","exit","search"};
