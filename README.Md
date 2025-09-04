@@ -15,7 +15,7 @@ Welcome to a user-defined interactive shell program using cpp.It mimics standard
 # Getting Started:
 *Clone the Repository:\
 `git clone https://github.com/your-username/POSIX-shell.git`\
-`cd POSIX-shell`
+`cd POSIX-shell`\
 *Compile and Run: \
 `make` \
 `./shell.out`
