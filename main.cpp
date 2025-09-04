@@ -26,8 +26,8 @@ int main()
     {
        
 
-        string line;
-        if(!getline(cin,line))
+        string line= get_input(prompt());
+        if(line.empty() && cin.eof())
         {
             saveHistory();
             break;
