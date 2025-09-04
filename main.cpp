@@ -27,7 +27,7 @@ int main()
        
 
         string line= get_input(prompt());
-        if(cin.eof())
+        if(line=="EOF")
         {
             saveHistory();
             break;
