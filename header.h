@@ -2,7 +2,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include <fstream>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -19,26 +18,22 @@
 
 #define N 4096    // PATH_MAX
 using namespace std;
-
-// ========= Shared Globals =========
-// Inline avoids "multiple definition" errors when included in many .cpp files
 inline string SHELL_HOME;           
 inline pid_t foreground_pgid = -1;  
 inline vector<pid_t> bg_pids;       
 
-// ========= Shared Structure =========
+// shared structure
 struct Cmd {
     vector<string> argv;
     string infile;
     string outfile;
     bool append = false;
 };
-// helpers
+// tokenize and display
 vector<string> tokenize(const string &line);
-// ========= Display =========
 string prompt();
 
-// ========= Builtins =========
+// Builtins 
 void cd(const vector<string> &args);
 void pwd();
 void echo(const string &line);
@@ -46,11 +41,11 @@ void search(const vector<string> &args);
 void pinfo(vector<string> args);
 void lsCommand(const vector<string> &args);
 
-// ========= System Commands =========
+// System Commands 
 void sigchld_handler(int sig);
 void executesyscmd(vector<string> args);
 
-// ========= Signals =========
+// signals and job controls
 extern pid_t fgProcess;
 struct Job {
     pid_t pid;
@@ -63,15 +58,14 @@ void sigintHandler(int sig);
 void sigtstpHandler(int sig);
 void setup_signals();
 
- // ========= History =========
-extern vector<string> histlist;   // shared history
-extern int history_index;             // current index for UP/DOWN
-void add_history(const string &cmd);
-void load_history();
-void save_history();
+//  History 
+extern vector<string> histlist;   
+extern int history_index;             
+void addHistory(const string &cmd);
+void loadHistory();
+void saveHistory();
 string get_input(const string &prompt);
-void print_history(int n);
-
+void printHistory(int n);
 
 //  I/O redirection
 bool handle_redirection(vector<string> &args);

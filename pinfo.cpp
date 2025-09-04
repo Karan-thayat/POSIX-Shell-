@@ -8,11 +8,9 @@
 void pinfo(vector<string> args) {
     pid_t pid;
 
-    // Case 1: no PID provided → self PID
     if (args.size() == 1) {
         pid = getpid();
     } 
-    // Case 2: user provided a PID
     else {
         pid = stoi(args[1]);
     }
@@ -31,21 +29,20 @@ void pinfo(vector<string> args) {
         if (line.rfind("State:", 0) == 0) {
             string key;
             stringstream ss(line);
-            ss >> key >> state;  // key="State:", state="R/S/Z/T"
+            ss >> key >> state;  
         } else if (line.rfind("VmSize:", 0) == 0) {
             string key;
             stringstream ss(line);
-            ss >> key >> memory; // memory in KB
+            ss >> key >> memory; 
         }
     }
     statusFile.close();
 
-    // Foreground process? → add "+"
     if (tcgetpgrp(STDIN_FILENO) == getpgid(pid)) {
         state += "+";
     }
 
-    // Resolve executable path
+  
     char exeBuf[PATH_MAX];
     ssize_t len = readlink(exePath.c_str(), exeBuf, sizeof(exeBuf) - 1);
     string exeRealPath;
@@ -56,7 +53,6 @@ void pinfo(vector<string> args) {
         exeRealPath = "N/A";
     }
 
-    // Print process info
     cout << "pid -- " << pid << endl;
     cout << "Process Status -- " << state << endl;
     cout << "memory -- " << memory << endl;

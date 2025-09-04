@@ -30,7 +30,6 @@ bool searchHelper(const string &dirPath, const string &target) {
     closedir(dir);
     return false;
 }
-// search command 
 void search(const vector<string> &args) {
     if (args.size() != 2) {
         cout << "Usage: search <filename>" << endl;

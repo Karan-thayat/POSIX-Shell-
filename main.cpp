@@ -1,5 +1,4 @@
 #include "header.h"
-// helper: split string by spaces (for cd, pwd etc.)
 vector<string> tokenize(const string &line)
 {
     stringstream ss(line);
@@ -16,12 +15,11 @@ int main()
     signal(SIGTSTP, sigtstpHandler);
     setup_signals();
 
-    // save starting directory into SHELL_HOME
     char cwd0[PATH_MAX];
     if(!getcwd(cwd0, sizeof(cwd0))) perror("getcwd");
     SHELL_HOME = string(cwd0);
 
-    load_history();
+    loadHistory();
     setup_autocomplete();
     while (true)
     {
@@ -31,26 +29,21 @@ int main()
         if (line.empty())
             continue;
 
-        add_history(line);
-
-        // ========= PIPELINE HANDLING =========
+        addHistory(line);
         if (line.find('|') != string::npos)
         {
             execute_pipeline(line);
-            continue; // already executed
+            continue; 
         }
 
-        // ========= NORMAL COMMANDS =========
         vector<string> args = tokenize(line);
         if (args.empty()) continue;
 
         string cmd = args[0];
 
-        // save original stdin/stdout
         int saved_stdin = dup(STDIN_FILENO);
         int saved_stdout = dup(STDOUT_FILENO);
 
-        // apply I/O redirection if any
         if (handle_redirection(args))
         {
             dup2(saved_stdin, STDIN_FILENO);
@@ -60,22 +53,16 @@ int main()
             continue;
         }
 
-        // -------- Builtins --------
         if (cmd == "exit")
         {
-            save_history();
+            saveHistory();
             break;
         }
-        else if (cmd == "cd")
-            cd(args);
-        else if (cmd == "pwd")
-            pwd();
-        else if (cmd == "echo")
-            echo(line);  // echo preserves spaces
-        else if (cmd == "search")
-            search(args);
-        else if (cmd == "pinfo")
-            pinfo(args);
+        else if (cmd == "cd")cd(args);
+        else if (cmd == "pwd")pwd();
+        else if (cmd == "echo")echo(line);  
+        else if (cmd == "search")search(args);
+        else if (cmd == "pinfo")pinfo(args);
         else if (cmd == "ls")
         {
             vector<string> lsArgs(args.begin() + 1, args.end());
@@ -83,7 +70,7 @@ int main()
         }
         else if (cmd == "history")
         {
-            int n = 10; // default
+            int n = 10; 
             if (args.size() > 1)
             {
                 try { n = stoi(args[1]); }
@@ -96,15 +83,12 @@ int main()
                     continue;
                 }
             }
-            print_history(n);
+            printHistory(n);
         }
         else
         {
-            // -------- External Commands --------
             executesyscmd(args);
         }
-
-        // restore stdin/stdout after every command
         dup2(saved_stdin, STDIN_FILENO);
         dup2(saved_stdout, STDOUT_FILENO);
         close(saved_stdin);

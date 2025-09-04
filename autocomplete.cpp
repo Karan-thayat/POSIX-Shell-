@@ -53,7 +53,7 @@ void setup_autocomplete() {
 
 string get_input(const string &prompt_str) {
     char *line = readline(prompt_str.c_str());
-    if (line && *line) add_history(line); // readline history
+    if (line && *line) add_history(line); 
     string s = line ? line : "";
     free(line);
     return s;

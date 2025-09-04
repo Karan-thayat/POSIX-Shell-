@@ -1,6 +1,6 @@
 CXX := g++
 CXXFLAGS := -std=gnu++17 -O2 -Wall -Wextra 
-TARGET := shell
+TARGET := shell 
 
 SRC := main.cpp display.cpp builtin.cpp  \
        ls.cpp syscmd.cpp pinfo.cpp search.cpp \

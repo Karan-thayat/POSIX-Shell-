@@ -1,13 +1,14 @@
 // cd echo pwd builtin
 #include "header.h"
-
+//cd
 void cd(const vector<string> &args) {
-    if(args.size()>2){
+    if(args.size()>2) // more than 2 arguments
+    {
         cout<<"Invalid arguments for error handling"<<endl;
         return ;
     }
 
-    if (args.size() == 1) 
+    if (args.size() == 1) //moves to shell home
     {
        if(chdir(SHELL_HOME.c_str())!=0)
        {
@@ -41,6 +42,7 @@ void cd(const vector<string> &args) {
         }
     }
 }
+//pwd
 void pwd() {
     char cwd[N];
     if (getcwd(cwd, N)) {
@@ -49,23 +51,22 @@ void pwd() {
         perror("pwd");
     }
 }
-
+//echo
 void echo(const string &line) {
 
-     string raw = line.substr(4);
-
+    string s = line.substr(4);
     string output;
-    for (size_t i = 0; i < raw.size(); ) {
-        if (raw.compare(i, 6, "&nbsp;") == 0) {
+    for (size_t i = 0; i < s.size();) {
+        if (s.compare(i, 6, "&nbsp;") == 0) {
             output.push_back(' ');
             i += 6;
         } else {
-            output.push_back(raw[i]);
+            output.push_back(s[i]);
             i++;
         }
     }
 
-    string collapsed;
+    string sp;
     bool inQuotes = false;
     bool inSpace = false;
 
@@ -73,23 +74,22 @@ void echo(const string &line) {
         char c = output[i];
 
         if (c == '"' || c == '\'') {
-            inQuotes = !inQuotes;  
-            collapsed.push_back(c); 
+            inQuotes = true;  
+            sp.push_back(c); 
             continue;
         }
-
         if (!inQuotes && (c == ' ' || c == '\t')) {
             if (!inSpace) {
-                collapsed.push_back(' ');
+                sp.push_back(' ');
                 inSpace = true;
             }
         } else {
-            collapsed.push_back(c);
+            sp.push_back(c);
             inSpace = false;
         }
     }
 
-    cout << collapsed << endl;
+    cout << sp << endl;
 } 
 
   

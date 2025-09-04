@@ -7,7 +7,6 @@
 
 using namespace std;
 
-// ===== Helper: trim spaces =====
 static string trim(const string &s) {
     size_t start = s.find_first_not_of(" \t");
     size_t end = s.find_last_not_of(" \t");
@@ -16,7 +15,7 @@ static string trim(const string &s) {
 }
 
 void execute_pipeline(const string &line) {
-    // Split input by '|'
+    
     vector<string> commands;
     stringstream ss(line);
     string part;
@@ -37,30 +36,25 @@ void execute_pipeline(const string &line) {
         }
 
         pid_t pid = fork();
-        if (pid == 0) { // ===== Child =====
-            // Input from previous pipe
+        if (pid == 0) { 
             if (prev_fd != -1) {
                 dup2(prev_fd, STDIN_FILENO);
                 close(prev_fd);
             }
 
-            // Output to next pipe
             if (i < n - 1) {
                 dup2(pipefd[1], STDOUT_FILENO);
                 close(pipefd[0]);
                 close(pipefd[1]);
             }
 
-            // Tokenize this command
             vector<string> args = tokenize(commands[i]);
             if (args.empty()) exit(0);
 
-            // Handle I/O redirection
             handle_redirection(args);
 
             string cmd = args[0];
 
-            // ===== Builtins inside pipeline (informational only) =====
             if (cmd == "pwd") pwd();
             else if (cmd == "echo") echo(commands[i]);
             else if (cmd == "history") {
@@ -68,10 +62,9 @@ void execute_pipeline(const string &line) {
                 if (args.size() > 1) {
                     try { n = stoi(args[1]); } catch (...) { cerr << "history: invalid number\n"; }
                 }
-                print_history(n);
+                printHistory(n);
             }
             else {
-                // External command
                 vector<char*> argv;
                 for (auto &a : args) argv.push_back(const_cast<char*>(a.c_str()));
                 argv.push_back(nullptr);
@@ -79,7 +72,7 @@ void execute_pipeline(const string &line) {
                 perror("execvp");
             }
             exit(0);
-        } else if (pid > 0) { // ===== Parent =====
+        } else if (pid > 0) { 
             pids.push_back(pid);
             if (prev_fd != -1) close(prev_fd);
             if (i < n - 1) {
@@ -91,7 +84,5 @@ void execute_pipeline(const string &line) {
             return;
         }
     }
-
-    // Wait for all children to finish
     for (pid_t pid : pids) waitpid(pid, NULL, 0);
 }

@@ -50,5 +50,5 @@ bool handle_redirection(vector<string> &args) {
             i++;
         }
     }
-    return false; // success
+    return false; 
 }

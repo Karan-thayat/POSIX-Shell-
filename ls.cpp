@@ -1,6 +1,6 @@
 #include "header.h"
 
-// Expand ~ to HOME directory
+// Expand ~ to HOME 
 string expandPath(const string &path) {
     if (path == "~") {
         const char *home = getenv("HOME");
@@ -16,7 +16,6 @@ void printLongFormat(const string &fullPath, const string &name) {
         perror(("ls: cannot access " + fullPath).c_str());
         return;
     }
-
     // Permissions
     cout << ((S_ISDIR(st.st_mode)) ? "d" : "-");
     cout << ((st.st_mode & S_IRUSR) ? "r" : "-");
@@ -29,24 +28,19 @@ void printLongFormat(const string &fullPath, const string &name) {
     cout << ((st.st_mode & S_IWOTH) ? "w" : "-");
     cout << ((st.st_mode & S_IXOTH) ? "x" : "-");
 
-    // Hard links
-    cout << " " << setw(2) << st.st_nlink;
+    cout << " " << setw(2) << st.st_nlink; //hard links
 
-    // Owner and group
     struct passwd *pw = getpwuid(st.st_uid);
     struct group *gr = getgrgid(st.st_gid);
     cout << " " << (pw ? pw->pw_name : to_string(st.st_uid));
     cout << " " << (gr ? gr->gr_name : to_string(st.st_gid));
 
-    // File size
     cout << " " << setw(8) << st.st_size;
 
-    // Modification time
     char buf[80];
     strftime(buf, sizeof(buf), "%b %d %H:%M", localtime(&st.st_mtime));
     cout << " " << buf;
 
-    // File name
     cout << " " << name << endl;
 }
 
@@ -77,7 +71,7 @@ void lsCommand(const vector<string>& args) {
             continue;
         }
 
-        // Case 1: Path is a directory
+        // path is directory
         if (S_ISDIR(st.st_mode)) {
             DIR *dir = opendir(paths[p].c_str());
             if (!dir) {
@@ -96,10 +90,8 @@ void lsCommand(const vector<string>& args) {
             }
             closedir(dir);
 
-            // Sort alphabetically like real ls
             sort(entries.begin(), entries.end());
 
-            // Print entries
             for (auto &name : entries) {
                 string fullPath = paths[p] + "/" + name;
                 if (longFormat) {
@@ -111,7 +103,7 @@ void lsCommand(const vector<string>& args) {
 
             if (p != paths.size() - 1) cout << endl;
         }
-        // Case 2: Path is a file
+        // path is a file
         else {
             if (longFormat) {
                 printLongFormat(paths[p], paths[p]);
