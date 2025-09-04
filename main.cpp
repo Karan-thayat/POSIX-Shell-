@@ -10,11 +10,12 @@ vector<string> tokenize(const string &line)
 }
 
 int main()
-{
-    signal(SIGINT, sigintHandler);
-    signal(SIGTSTP, sigtstpHandler);
+{   
+    // register signal handlers
+    signal(SIGINT, sigintHandler); // ctrl+c
+    signal(SIGTSTP, sigtstpHandler);// ctrl+z
     setup_signals();
-
+    //save shell home directory
     char cwd0[PATH_MAX];
     if(!getcwd(cwd0, sizeof(cwd0))) perror("getcwd");
     SHELL_HOME = string(cwd0);
@@ -25,7 +26,13 @@ int main()
     {
        
 
-        string line = get_input(prompt());
+        string line;
+        if(!getline(cin,line))
+        {
+            saveHistory();
+            break;
+        }
+
         if (line.empty())
             continue;
 

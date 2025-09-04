@@ -18,8 +18,8 @@ void sigchld_handler(int sig)
 
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
     {
-        auto it = find_if(jobs.begin(), jobs.end(),
-                          [pid](Job &job){ return job.pid == pid; });
+        auto it = find_if(jobs.begin(), jobs.end(),[pid](Job &job)
+                            { return job.pid == pid; });
         if (it != jobs.end())
         {
             cout << "\nBackground process finished: " << it->command
@@ -35,9 +35,7 @@ void sigintHandler(int sig)
     if (fgProcess > 0)
     {
         kill(fgProcess, SIGINT);
-        cout << endl
-             << "Killed foreground process: " << fgName
-             << " (PID " << fgProcess << ")" << endl;
+        cout << endl;
         fgProcess = -1; 
         fgName = "";
     }
@@ -53,7 +51,7 @@ void sigtstpHandler(int sig)
              << "Stopped foreground process: " << fgName
              << " (PID " << fgProcess << ")" << endl;
 
-        jobs.push_back({fgProcess, fgName, false});
+        jobs.push_back({fgProcess, fgName, true});
         fgProcess = -1; 
         fgName = "";
     }
@@ -71,4 +69,6 @@ void setup_signals()
 
     signal(SIGTTOU, SIG_IGN);
     signal(SIGTTIN, SIG_IGN);
+    signal(SIGINT, sigintHandler);
+    signal(SIGTSTP,sigtstpHandler);
 }

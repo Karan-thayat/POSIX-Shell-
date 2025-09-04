@@ -15,74 +15,103 @@ static string trim(const string &s) {
 }
 
 void execute_pipeline(const string &line) {
-    
-    vector<string> commands;
     stringstream ss(line);
-    string part;
-    while (getline(ss, part, '|')) {
-        commands.push_back(trim(part));
+    string segment;
+    vector<string> sequences;
+
+    while (getline(ss, segment, ';')) {
+        string trimmed = trim(segment);
+        if (!trimmed.empty()) sequences.push_back(trimmed);
     }
 
-    int n = commands.size();
-    if (n == 0) return;
-
-    int prev_fd = -1;
-    vector<pid_t> pids;
-
-    for (int i = 0; i < n; i++) {
-        int pipefd[2];
-        if (i < n - 1) {
-            if (pipe(pipefd) < 0) { perror("pipe"); return; }
+    for (const string &seq : sequences) {
+    
+        vector<string> commands;
+        stringstream ss2(seq);
+        string part;
+        while (getline(ss2, part, '|')) {
+            commands.push_back(trim(part));
         }
 
-        pid_t pid = fork();
-        if (pid == 0) { 
-            if (prev_fd != -1) {
-                dup2(prev_fd, STDIN_FILENO);
-                close(prev_fd);
-            }
+        int n = commands.size();
+        if (n == 0) continue;
 
+        int prev_fd = -1;
+        vector<pid_t> pids;
+
+        for (int i = 0; i < n; i++) {
+            int pipefd[2];
             if (i < n - 1) {
-                dup2(pipefd[1], STDOUT_FILENO);
-                close(pipefd[0]);
-                close(pipefd[1]);
+                if (pipe(pipefd) < 0) {
+                    perror("pipe");
+                    return;
+                }
             }
 
-            vector<string> args = tokenize(commands[i]);
-            if (args.empty()) exit(0);
-
-            handle_redirection(args);
-
-            string cmd = args[0];
-
-            if (cmd == "pwd") pwd();
-            else if (cmd == "echo") echo(commands[i]);
-            else if (cmd == "history") {
-                int n = 10;
-                if (args.size() > 1) {
-                    try { n = stoi(args[1]); } catch (...) { cerr << "history: invalid number\n"; }
+            pid_t pid = fork();
+            if (pid == 0) { 
+                if (prev_fd != -1) {
+                    dup2(prev_fd, STDIN_FILENO);
+                    close(prev_fd);
                 }
-                printHistory(n);
+
+                if (i < n - 1) {
+                    dup2(pipefd[1], STDOUT_FILENO);
+                    close(pipefd[0]);
+                    close(pipefd[1]);
+                }
+
+                vector<string> args = tokenize(commands[i]);
+                if (args.empty()) _exit(0);
+
+                if (handle_redirection(args)) {
+                    _exit(1);
+                }
+                if (args.empty()) _exit(0);
+
+                string cmd = args[0];
+
+                if (cmd == "pwd") pwd();
+                else if (cmd == "echo") echo(commands[i]);
+                else if (cmd == "cd") cd(args);
+                else if (cmd == "search") search(args);
+                else if (cmd == "pinfo") pinfo(args);
+                else if (cmd == "ls") {
+                    vector<string> lsArgs(args.begin() + 1, args.end());
+                    lsCommand(lsArgs);
+                }
+                else if (cmd == "history") {
+                    int num = 10;
+                    if (args.size() > 1) {
+                        try { num = stoi(args[1]); }
+                        catch (...) { cerr << "history: invalid number\n"; }
+                    }
+                    printHistory(num);
+                }
+               
+                else {
+                    vector<char*> argv;
+                    for (auto &a : args) argv.push_back(const_cast<char*>(a.c_str()));
+                    argv.push_back(nullptr);
+                    execvp(argv[0], argv.data());
+                    perror("execvp");
+                }
+                _exit(0);
+            }
+            else if (pid > 0) {
+                pids.push_back(pid);
+                if (prev_fd != -1) close(prev_fd);
+                if (i < n - 1) {
+                    close(pipefd[1]);
+                    prev_fd = pipefd[0];
+                }
             }
             else {
-                vector<char*> argv;
-                for (auto &a : args) argv.push_back(const_cast<char*>(a.c_str()));
-                argv.push_back(nullptr);
-                execvp(argv[0], argv.data());
-                perror("execvp");
+                perror("fork");
+                return;
             }
-            exit(0);
-        } else if (pid > 0) { 
-            pids.push_back(pid);
-            if (prev_fd != -1) close(prev_fd);
-            if (i < n - 1) {
-                close(pipefd[1]);
-                prev_fd = pipefd[0];
-            }
-        } else {
-            perror("fork");
-            return;
         }
+
+        for (pid_t pid : pids) waitpid(pid, NULL, 0);
     }
-    for (pid_t pid : pids) waitpid(pid, NULL, 0);
 }
